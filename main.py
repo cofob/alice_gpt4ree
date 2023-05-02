@@ -15,6 +15,7 @@ answer = None
 pending_request = None
 
 def req_thread():
+    global pending_request
     while True:
         sleep(0.1)
         if pending_request is not None:
@@ -32,7 +33,9 @@ CUT_WORD = ['Алиса', 'алиса']
 users_state = dict()
 
 def request_gpt(text: str):
+    global pending_request
     def func():
+        global answer
         r = you.Completion.create(prompt=text)
         answer = r.request
     pending_request = func
