@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.11
 WORKDIR /app
 
 # RUN apk update && apk add gcc musl-dev
