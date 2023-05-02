@@ -4,16 +4,38 @@ from typing import Union
 from fastapi import FastAPI, Request
 
 import datetime
-from dotenv import load_dotenv
-load_dotenv()
-import gpt
+
+from gpt4free import you
+from threading import Thread
+from time import sleep
 
 app = FastAPI()
-answers = dict()
+
+answer = None
+pending_request = None
+
+def req_thread():
+    while True:
+        time.sleep(0.1)
+        if pending_request is not None:
+            try:
+                pending_request()
+            except Exception as e:
+                print(f"exception in loop: {e}")
+            pending_request = None
+
+t = Thread(target=req_thread)
+t.start()
 
 CUT_WORD = ['Алиса', 'алиса']
 
 users_state = dict()
+
+def request_gpt(text: str):
+    def func():
+        r = you.Completion.create(prompt=text)
+        answer = r.request
+    pending_request = func
 
 @app.post("/post")
 async def post(request: Request):
@@ -31,23 +53,13 @@ async def post(request: Request):
     return response
 
 async def handle_dialog(res,req):
+    global answer
+
     print('start handle:', datetime.datetime.now(tz=None))
     print(req)
-    session_id = req['session'].get('session_id')
-    print('userid', session_id)
-    if session_id and not session_id in users_state:
-        users_state[session_id] = {
-            'messages': [],
-        }
-
-    if session_id:
-        session_state = users_state[session_id]
-    else:
-        session_state = {}
 
     if req['request']['original_utterance']:
-        ## Проверяем, есть ли содержимое
-        messages = session_state.get('messages', [])
+        # Проверяем, есть ли содержимое
         request = req['request']['original_utterance']
         for word in CUT_WORD:
             if request.startswith(word):
@@ -55,43 +67,24 @@ async def handle_dialog(res,req):
         request = request.strip()
 
 
-        if 'message' not in session_state:
-            task = asyncio.create_task(ask(request, messages))
-            await asyncio.sleep(1)
-            messages.append(request)
-            session_state['messages'] = messages
-            if task.done():
-                reply = task.result()
-                del answers[request]
-            else:
+        if answer is None:
+            task = request_gpt(request)
+            if answer is None:
                 print('no response')
-                reply = 'Не успел получить ответ. Спросите позже'
-                res['response']['tts'] = reply + '<speaker audio="alice-sounds-things-door-2.opus">'
-                session_state['message'] = request
-        else:
-            old_request = session_state['message']
-            if old_request not in answers:
-                reply = 'Ответ пока не готов, спросите позже'
-                res['response']['tts'] = reply + '<speaker audio="alice-sounds-things-door-2.opus">'
+                reply = 'Не успел получить ответ. Спросите позже.'
             else:
-                answer = answers[old_request]
-                del answers[old_request]
-                del session_state['message']
-                reply = f'Отвечаю на предыдущий вопрос "{old_request}"\n {answer}'
+                print(f"response: {answer}")
+                reply = answer
+                answer = None
+        else:
+            if answer is None:
+                print('no response')
+                reply = 'Ответа ещё нет.'
+            else:
+                print(f"response: {answer}")
+                reply = answer
+                answer = None
     else:
-        reply = 'Я умный chat бот. Спроси что-нибудь'
-        ## Если это первое сообщение — представляемся
+        reply = 'Спроси что-нибудь'
+
     res['response']['text'] = reply
-    print('end handle:', datetime.datetime.now(tz=None))
-
-async def ask(request, messages):
-    try:
-        reply = await gpt.aquery(request, messages)
-    except Exception as e:
-        traceback.print_exc()
-        reply = 'Не удалось получить ответ'
-    answers[request] = reply
-    print('get response from gpt:', datetime.datetime.now(tz=None))
-    return reply
-
-
