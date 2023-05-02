@@ -72,6 +72,7 @@ async def handle_dialog(res,req):
 
         if answer is None:
             task = request_gpt(request)
+            sleep(2)
             if answer is None:
                 print('no response')
                 reply = 'Не успел получить ответ. Спросите позже.'
