@@ -16,7 +16,7 @@ pending_request = None
 
 def req_thread():
     while True:
-        time.sleep(0.1)
+        sleep(0.1)
         if pending_request is not None:
             try:
                 pending_request()
