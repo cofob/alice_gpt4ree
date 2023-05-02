@@ -37,7 +37,8 @@ def request_gpt(text: str):
     def func():
         global answer
         r = you.Completion.create(prompt=text)
-        answer = r.request
+        print(f"gpt: {r}")
+        answer = r.text
     pending_request = func
 
 @app.post("/post")
