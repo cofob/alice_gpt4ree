@@ -1,46 +1,38 @@
-# GhatGPT навык для Алисы от Яндекса
+# GPT-4-Free навык для Алисы от Яндекса
 
-# Описание
+## Описание
 
-Этот проект добавляет навык для умной колонки Алиса, который позволяет использовать модель языка ChatGPT для генерации текста в ответ на пользовательские запросы. Проект работает через API_KEY, который позволяет взаимодействовать с моделью языка ChatGPT на удаленном сервере.
+Этот проект является форком проекта [chat_gpt_yandex_alice](https://github.com/peleccom/chat_gpt_yandex_alice) и добавляет навык для умной колонки Алиса, который позволяет использовать модель языка ChatGPT для генерации текста в ответ на пользовательские запросы. Основное отличие этого проекта в том, что вместо официального API OpenAI используется [gpt4free](https://github.com/xtekky/gpt4free), с API от you.com поискового сервиса. Это означает, что для запуска нужен только сервер и платить за API ненужно, так как оно бесплатно.
 
-# Инструкции по установке и использованию
+## Инструкции по установке и использованию
 
-## Установка
+1. Склонируйте репозиторий на свой компьютер:
 
-* Склонируйте репозиторий на свой компьютер:
+```bash
+git clone https://github.com/cofob/alice_gpt4ree.git
+```
 
-      git clone https://github.com/peleccom/chat_gpt_yandex_alice.git
+2. Запустите проект:
 
-* Получите API_KEY в профиле на сайте openai https://platform.openai.com/account/api-keys
+```bash
+docker-compose up
+```
 
-* Сохраните его в .env файле в корне проекта
-    OPENAI_API_KEY={YOUR_KEY}
-
-* Запустите проект
-
-      docker-compose up
-
-
-* Подключите навык к Алисе
-
+3. Подключите навык к Алисе.
 
 ## Локальное тестирование
 
-Установите утилиту [alice-nearby](https://github.com/azzzak/alice-nearby)
+1. Установите утилиту alice-nearby.
+2. Запустите ее указав webhook на localhost:
 
+```bash
+./alice-nearby --webhook=http://localhost:5000/post --port=3456
+```
 
-Запустите ее указав webhook на localhost
+3. Откройте <http://localhost:3456> в браузере.
 
-    ./alice-nearby --webhook=http://localhost:5000/post --port=3456
+## Ссылки
 
-
-Откройте `http://localhost:3456` в браузере
-
-# Ссылки
-
-OpenAI API: https://openai.com/api/
-
-Документация по API Алисы: https://yandex.ru/dev/dialogs/alice/doc/
-
-Руководство по разработке навыков для Алисы: https://yandex.ru/dev/dialogs/alice/doc/quickstart-about.html
+- [GPT4Free API](https://github.com/xtekky/gpt4free)
+- [Документация по API Алисы](https://yandex.ru/dev/dialogs/alice/doc/)
+- [Руководство по разработке навыков для Алисы](https://yandex.ru/dev/dialogs/alice/doc/quickstart-about.html)
